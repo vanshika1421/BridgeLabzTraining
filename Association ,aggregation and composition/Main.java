@@ -1,0 +1,86 @@
+// ---------- Association ----------
+class Student {
+    String name;
+
+    Student(String name) {
+        this.name = name;
+    }
+}
+
+class Teacher {
+    void teach(Student student) {
+        System.out.println("Teacher is teaching " + student.name);
+    }
+}
+
+// ---------- Aggregation ----------
+class Employee {
+    String name;
+
+    Employee(String name) {
+        this.name = name;
+    }
+}
+
+class Department {
+    Employee employee;
+
+    Department(Employee employee) {
+        this.employee = employee;
+    }
+
+    void showEmployee() {
+        System.out.println("Department has employee: " + employee.name);
+    }
+}
+
+// ---------- Composition ----------
+class Engine {
+    void start() {
+        System.out.println("Engine Started");
+    }
+}
+
+class Car {
+    private Engine engine;
+
+    Car() {
+        // Engine is created inside Car
+        engine = new Engine();
+    }
+
+    void startCar() {
+        engine.start();
+        System.out.println("Car Started");
+    }
+}
+
+// ---------- Main Class ----------
+public class Main {
+
+    public static void main(String[] args) {
+
+        // ================= Association =================
+        System.out.println("----- Association -----");
+
+        Student s = new Student("Vanshika");
+        Teacher t = new Teacher();
+
+        t.teach(s);
+
+        // ================= Aggregation =================
+        System.out.println("\n----- Aggregation -----");
+
+        Employee e = new Employee("Rahul");
+        Department d = new Department(e);
+
+        d.showEmployee();
+
+        // ================= Composition =================
+        System.out.println("\n----- Composition -----");
+
+        Car car = new Car();
+
+        car.startCar();
+    }
+}
