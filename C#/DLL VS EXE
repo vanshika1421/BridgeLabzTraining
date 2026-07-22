@@ -1,0 +1,215 @@
+# How Does the C# Compiler Decide Whether to Create an `.exe` or a `.dll`?
+
+## Introduction
+
+When we build a C# project, the compiler creates a **.NET assembly**. An assembly can be either:
+
+- **`.exe`** – An executable application that can be run directly.
+- **`.dll`** – A library that contains reusable code and is used by other applications.
+
+A common misconception is that the compiler looks at the code and decides whether to create an `.exe` or a `.dll`. **It doesn't.** The decision is made based on the **project configuration**.
+
+---
+
+## Who Decides the Output?
+
+The compiler simply follows the instructions provided in the project's **`.csproj`** file.
+
+### If the project is an Executable
+
+```xml
+<PropertyGroup>
+    <OutputType>Exe</OutputType>
+</PropertyGroup>
+```
+
+The compiler generates:
+
+```
+MyApplication.exe
+```
+
+---
+
+### If the project is a Class Library
+
+```xml
+<PropertyGroup>
+    <OutputType>Library</OutputType>
+</PropertyGroup>
+```
+
+The compiler generates:
+
+```
+MyLibrary.dll
+```
+
+So, the compiler doesn't make the decision on its own—it follows the **`OutputType`** specified in the project.
+
+---
+
+## Does the Compiler Check the Code?
+
+**No.**
+
+The compiler does **not** examine your code to decide whether it should create an `.exe` or a `.dll`.
+
+Instead, it reads the project configuration:
+
+- `OutputType = Exe` → Create an **`.exe`**
+- `OutputType = Library` → Create a **`.dll`**
+
+---
+
+## What Role Does `Main()` Play?
+
+The `Main()` method is known as the **entry point** of a C# application.
+
+### Case 1: `OutputType = Exe`
+
+If the project is configured as an executable, the compiler expects a `Main()` method.
+
+```csharp
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Hello World");
+    }
+}
+```
+
+If no valid `Main()` method is found, the compiler throws an error because every executable needs an entry point.
+
+---
+
+### Case 2: `OutputType = Library`
+
+If the project is configured as a library:
+
+```xml
+<OutputType>Library</OutputType>
+```
+
+A `Main()` method is **not required**.
+
+Even if you write one, the compiler simply treats it like any other method because a library isn't meant to start execution on its own.
+
+---
+
+## Compilation Flow
+
+```
+C# Source Code (.cs)
+        │
+        ▼
+Roslyn (C# Compiler)
+        │
+        ▼
+Reads OutputType from the .csproj file
+        │
+        ├───────────────┐
+        │               │
+ OutputType = Exe   OutputType = Library
+        │               │
+        ▼               ▼
+      .exe            .dll
+```
+
+---
+
+## What Happens in Visual Studio?
+
+You usually don't have to set the output type yourself.
+
+When you create a project:
+
+- **Console App** → Visual Studio automatically sets `OutputType` to `Exe`.
+- **Class Library** → Visual Studio automatically creates a project that builds a `Library` (`.dll`).
+
+So, in most cases, everything is handled automatically.
+
+---
+
+## What If You're Using `csc` Directly?
+
+If you're compiling without Visual Studio and using the C# compiler (`csc`) yourself, you must specify the target manually.
+
+Create an executable:
+
+```bash
+csc Program.cs /target:exe
+```
+
+Create a library:
+
+```bash
+csc Calculator.cs /target:library
+```
+
+---
+
+## `.exe` vs `.dll`
+
+| Feature | `.exe` | `.dll` |
+|---------|:------:|:------:|
+| Can be executed directly | ✅ | ❌ |
+| Requires a `Main()` method | ✅ | ❌ |
+| Can be referenced by other projects | Sometimes | ✅ |
+| Contains IL (Intermediate Language) | ✅ | ✅ |
+| Contains Metadata | ✅ | ✅ |
+| Is a .NET Assembly | ✅ | ✅ |
+
+---
+
+## Key Takeaways
+
+- The compiler **does not decide** whether to create an `.exe` or a `.dll` by looking at your code.
+- It follows the **`OutputType`** defined in the project configuration.
+- `OutputType = Exe` produces an executable (`.exe`).
+- `OutputType = Library` produces a library (`.dll`).
+- An executable requires a valid `Main()` method.
+- A library does not require a `Main()` method.
+
+---
+
+# Interview Questions
+
+### 1. How does the C# compiler decide whether to generate an `.exe` or a `.dll`?
+
+**Answer:**  
+The compiler reads the **`OutputType`** setting from the project's `.csproj` file (or the `/target` option when using `csc`). It doesn't inspect the source code to make this decision.
+
+---
+
+### 2. What happens if `OutputType` is `Exe` but there is no `Main()` method?
+
+**Answer:**  
+Compilation fails because an executable application must have an entry point.
+
+---
+
+### 3. What happens if `OutputType` is `Library` but a `Main()` method is present?
+
+**Answer:**  
+The project is still compiled as a `.dll`. The `Main()` method is treated like a normal method and is **not** used as an entry point.
+
+---
+
+## Quick Summary
+
+```
+C# Code
+    │
+    ▼
+Roslyn Compiler (csc)
+    │
+    ▼
+Reads OutputType
+    │
+    ├── Exe     → Generates .exe
+    └── Library → Generates .dll
+```
+
+> **Remember:** The compiler doesn't choose between an `.exe` and a `.dll` by analyzing your code. It simply follows the project's `OutputType` setting.
