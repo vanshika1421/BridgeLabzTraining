@@ -1,0 +1,102 @@
+using System;
+
+// ---------- Association ----------
+class Student
+{
+    public string Name;
+
+    public Student(string name)
+    {
+        Name = name;
+    }
+}
+
+class Teacher
+{
+    public void Teach(Student student)
+    {
+        Console.WriteLine($"Teacher is teaching {student.Name}");
+    }
+}
+
+// ---------- Aggregation ----------
+class Employee
+{
+    public string Name;
+
+    public Employee(string name)
+    {
+        Name = name;
+    }
+}
+
+class Department
+{
+    private Employee employee;
+
+    public Department(Employee employee)
+    {
+        this.employee = employee;
+    }
+
+    public void ShowEmployee()
+    {
+        Console.WriteLine($"Department has employee: {employee.Name}");
+    }
+}
+
+// ---------- Composition ----------
+class Engine
+{
+    public void Start()
+    {
+        Console.WriteLine("Engine Started");
+    }
+}
+
+class Car
+{
+    private Engine engine;
+
+    public Car()
+    {
+        // Engine is created inside Car
+        engine = new Engine();
+    }
+
+    public void StartCar()
+    {
+        engine.Start();
+        Console.WriteLine("Car Started");
+    }
+}
+
+// ---------- Main Class ----------
+class Program
+{
+    static void Main(string[] args)
+    {
+        // ================= Association =================
+        Console.WriteLine("----- Association -----");
+
+        Student s = new Student("Vanshika");
+        Teacher t = new Teacher();
+
+        t.Teach(s);
+
+        // ================= Aggregation =================
+        Console.WriteLine("\n----- Aggregation -----");
+
+        Employee e = new Employee("Rahul");
+        Department d = new Department(e);
+
+        d.ShowEmployee();
+
+        // ================= Composition =================
+        Console.WriteLine("\n----- Composition -----");
+
+        Car car = new Car();
+
+        car.StartCar();
+    }
+}
