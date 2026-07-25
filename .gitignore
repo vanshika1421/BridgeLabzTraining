@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+**/.vs/
+
+# Build folders
+bin/
+obj/
+**/bin/
+**/obj/
+
+# User files
+*.user
+*.suo
+*.sln.docstates
+*.slnx
+*.csproj
