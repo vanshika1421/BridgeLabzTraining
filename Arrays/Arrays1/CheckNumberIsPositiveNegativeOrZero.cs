@@ -14,33 +14,58 @@ namespace Arrays
 {
     internal class PositiveNegativeZero
     {
- public static void CheckNumbers()
+        public static void CheckNumbers()
         {
             int[] arr = new int[5];
 
             Console.WriteLine("Enter 5 numbers:");
 
             // Input
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < arr.Length; i++)
             {
                 arr[i] = Convert.ToInt32(Console.ReadLine());
             }
 
             // Check each number
-            for (int i = 0; i < 5; i++)
+            Console.WriteLine("\nResult:");
+
+            for (int i = 0; i < arr.Length; i++)
             {
                 if (arr[i] > 0)
                 {
-                    Console.WriteLine(arr[i] + " is positive");
+                    if (arr[i] % 2 == 0)
+                    {
+                        Console.WriteLine(arr[i] + " is Positive and Even");
+                    }
+                    else
+                    {
+                        Console.WriteLine(arr[i] + " is Positive and Odd");
+                    }
                 }
                 else if (arr[i] < 0)
                 {
-                    Console.WriteLine(arr[i] + " is negative");
+                    Console.WriteLine(arr[i] + " is Negative");
                 }
                 else
                 {
-                    Console.WriteLine(arr[i] + " is zero");
+                    Console.WriteLine(arr[i] + " is Zero");
                 }
+            }
+
+            // Compare first and last element
+            Console.WriteLine();
+
+            if (arr[0] == arr[arr.Length - 1])
+            {
+                Console.WriteLine("First and Last elements are Equal.");
+            }
+            else if (arr[0] > arr[arr.Length - 1])
+            {
+                Console.WriteLine("First element is Greater than the Last element.");
+            }
+            else
+            {
+                Console.WriteLine("First element is Less than the Last element.");
             }
         }
     }
