@@ -8,23 +8,40 @@
 //c. If the number is negative, print negative. Else if the number is zero, print zero.
 //d. Finally compare the first and last element of the array and display if they equal, greater
 //or less
-//int[] arr = new int[5];
-//for (int i = 0; i < 5; i++)
-//{
-//    arr[i] = int.Parse(Console.ReadLine());
-//}
-//for (int i = 0; i < 5; i++)
-//{
-//    if (arr[i] > 0)
-//    {
-//        Console.WriteLine(arr[i] + " is positive");
-//    }
-//    if (arr[i] < 0)
-//    {
-//        Console.WriteLine(arr[i] + " is negative");
-//    }
-//    else
-//    {
-//        Console.WriteLine(arr[i] + "is zero");
-//    }
-//}
+using System;
+
+namespace Arrays
+{
+    internal class PositiveNegativeZero
+    {
+ public static void CheckNumbers()
+        {
+            int[] arr = new int[5];
+
+            Console.WriteLine("Enter 5 numbers:");
+
+            // Input
+            for (int i = 0; i < 5; i++)
+            {
+                arr[i] = Convert.ToInt32(Console.ReadLine());
+            }
+
+            // Check each number
+            for (int i = 0; i < 5; i++)
+            {
+                if (arr[i] > 0)
+                {
+                    Console.WriteLine(arr[i] + " is positive");
+                }
+                else if (arr[i] < 0)
+                {
+                    Console.WriteLine(arr[i] + " is negative");
+                }
+                else
+                {
+                    Console.WriteLine(arr[i] + " is zero");
+                }
+            }
+        }
+    }
+}
