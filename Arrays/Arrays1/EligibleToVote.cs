@@ -6,31 +6,31 @@
 ////b. Loop through the array using the length property and for the element of the array check
 ////If the age is a negative number print an invalid age and if 18 or above, print The student
 ////with the age ___ can vote. Otherwise, print The student with the age ___ cannot vote.
-//namespace Arrays {
-//    internal class EligibleToVote
-//    {
-//        public static void Check(int n)
-//        {
-//            int[] age = new int[n];
-//            for (int i = 0; i < 10; i++)
-//            {
-//                age[i] = int.Parse(Console.ReadLine());
-//            }
-//            for (int i = 0; i < 10; i++)
-//            {
-//                if (age[i] < 0)
-//                {
-//                    Console.WriteLine("Invalid age" + $"{age[i]}");
-//                }
-//                else if (age[i] >= 18)
-//                {
-//                    Console.WriteLine("The student with the age" + $"{age[i]}" + " can vote");
-//                }
-//                else
-//                {
-//                    {
-//                        Console.WriteLine("The student with the age " + $"{age[i]}" + " cannot vote");
-//                    }
-//                }
-//            }
-//        } }
+namespace Arrays {
+   internal class EligibleToVote
+   {
+       public static void Check(int n)
+       {
+           int[] age = new int[n];
+           for (int i = 0; i < 10; i++)
+           {
+               age[i] = int.Parse(Console.ReadLine());
+           }
+           for (int i = 0; i < 10; i++)
+           {
+               if (age[i] < 0)
+               {
+                   Console.WriteLine("Invalid age" + $"{age[i]}");
+               }
+               else if (age[i] >= 18)
+               {
+                   Console.WriteLine("The student with the age" + $"{age[i]}" + " can vote");
+               }
+               else
+               {
+                   {
+                       Console.WriteLine("The student with the age " + $"{age[i]}" + " cannot vote");
+                   }
+               }
+           }
+       } }
