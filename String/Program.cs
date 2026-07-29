@@ -12,6 +12,10 @@ class Program
         //LongestWordInString.longestWord();
         //SubstringOccurance.substringOccurance();
         //ToggleCase.ToggleCaseMethod();
-        CompareTwoStrings.CompareTwoString();
+        //CompareTwoStrings.CompareTwoString();
+        // MostFrequentCharacter.Frequency();
+        //RemoveSpecificCharater.removeSpecificChar();
+        //AnagramCheck.checkAnagram();
+        ReplaceWord.Replace();
     }
 }
