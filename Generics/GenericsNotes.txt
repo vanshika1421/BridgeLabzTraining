@@ -1,0 +1,1223 @@
+# C# Generics — Complete Notes
+
+Generics are one of the most important features of C#. They allow developers to create **reusable, type-safe, and maintainable code** that can work with different data types while preserving compile-time type information.
+
+These notes cover C# Generics from fundamental concepts to advanced topics, with examples, explanations, and interview-oriented points.
+
+---
+
+## Table of Contents
+
+1. [What Are Generics?](#1-what-are-generics)
+2. [Why Do We Need Generics?](#2-why-do-we-need-generics)
+3. [Generics vs `object`](#3-generics-vs-object)
+4. [Generic Classes](#4-generic-classes)
+5. [Generic Methods](#5-generic-methods)
+6. [Multiple Type Parameters](#6-multiple-type-parameters)
+7. [Generic Interfaces](#7-generic-interfaces)
+8. [Generic Constraints](#8-generic-constraints)
+9. [Types of Generic Constraints](#9-types-of-generic-constraints)
+10. [Generic Collections](#10-generic-collections)
+11. [Generic vs Non-Generic Collections](#11-generic-vs-non-generic-collections)
+12. [Boxing and Unboxing](#12-boxing-and-unboxing)
+13. [Type Inference](#13-type-inference)
+14. [Generics and Inheritance](#14-generics-and-inheritance)
+15. [Variance](#15-variance)
+16. [Generics and LINQ](#16-generics-and-linq)
+17. [Generic Delegates](#17-generic-delegates)
+18. [Generics in .NET](#18-generics-in-net)
+19. [Advantages of Generics](#19-advantages-of-generics)
+20. [Common Interview Questions](#20-common-interview-questions)
+
+---
+
+# 1. What Are Generics?
+
+Generics allow us to define classes, methods, interfaces, delegates, and data structures using **type parameters** instead of specifying a concrete type.
+
+Example:
+
+```csharp
+public class Box<T>
+{
+    public T Value { get; set; }
+}
+```
+
+Here, `T` is a **type parameter**.
+
+The same class can be used with different types:
+
+```csharp
+Box<int> intBox = new Box<int>();
+intBox.Value = 10;
+
+Box<string> stringBox = new Box<string>();
+stringBox.Value = "Hello";
+```
+
+Conceptually:
+
+```text
+              Box<T>
+                 |
+       +---------+---------+
+       |         |         |
+       ↓         ↓         ↓
+   Box<int>  Box<string>  Box<double>
+```
+
+### Important Terminology
+
+* **Generic type** → A type containing one or more type parameters.
+* **Type parameter** → Placeholder such as `T`.
+* **Type argument** → Actual type supplied to the generic type, such as `int`.
+* **Constructed generic type** → A generic type with its type arguments supplied, such as `Box<int>`.
+
+`T` is not itself a datatype. It is a **placeholder representing a type**.
+
+Common naming conventions include:
+
+```text
+T        → Type
+TKey     → Key type
+TValue   → Value type
+TResult  → Result type
+TEntity  → Entity type
+```
+
+---
+
+# 2. Why Do We Need Generics?
+
+Before Generics, reusable collections and classes often relied on `object`.
+
+For example:
+
+```csharp
+class Box
+{
+    public object Value { get; set; }
+}
+```
+
+This allows:
+
+```csharp
+Box box = new Box();
+
+box.Value = 10;
+box.Value = "Hello";
+box.Value = 10.5;
+```
+
+However, retrieving a value may require casting:
+
+```csharp
+int number = (int)box.Value;
+```
+
+This introduces potential runtime errors.
+
+With Generics:
+
+```csharp
+class Box<T>
+{
+    public T Value { get; set; }
+}
+```
+
+We can write:
+
+```csharp
+Box<int> box = new Box<int>();
+
+box.Value = 10;
+
+int number = box.Value;
+```
+
+The compiler knows that `Value` is an `int`.
+
+### Major benefits
+
+Generics provide:
+
+* Compile-time type safety
+* Code reusability
+* Reduced need for casting
+* Reduced boxing/unboxing for value types
+* Better readability
+* Better maintainability
+* Potential performance benefits
+
+---
+
+# 3. Generics vs `object`
+
+A common question is:
+
+> Why use Generics when everything derives from `object`?
+
+Consider:
+
+```csharp
+object value = 10;
+
+int number = (int)value;
+```
+
+The value is treated as an `object`, so a cast is required when retrieving it as an `int`.
+
+With Generics:
+
+```csharp
+class Box<T>
+{
+    public T Value { get; set; }
+}
+
+Box<int> box = new Box<int>();
+
+box.Value = 10;
+
+int number = box.Value;
+```
+
+The type is preserved.
+
+| Feature          | Generics             | `object`                  |
+| ---------------- | -------------------- | ------------------------- |
+| Type information | Preserved            | Generalized to `object`   |
+| Type safety      | Compile time         | Often runtime             |
+| Casting          | Usually unnecessary  | Often required            |
+| Boxing           | Can often be avoided | Can occur for value types |
+| Reusability      | Yes                  | Yes                       |
+
+The key idea is:
+
+> **Generics allow reuse without giving up compile-time type information.**
+
+---
+
+# 4. Generic Classes
+
+A generic class contains one or more type parameters.
+
+```csharp
+class Storage<T>
+{
+    public T Value { get; set; }
+}
+```
+
+Usage:
+
+```csharp
+Storage<int> intStorage = new Storage<int>();
+intStorage.Value = 100;
+
+Storage<string> stringStorage = new Storage<string>();
+stringStorage.Value = "Hello";
+```
+
+Here:
+
+```text
+Storage<int>
+    T = int
+
+Storage<string>
+    T = string
+```
+
+The same generic class can therefore work with different types.
+
+---
+
+# 5. Generic Methods
+
+A method can have its own type parameter.
+
+```csharp
+public void Display<T>(T value)
+{
+    Console.WriteLine(value);
+}
+```
+
+Usage:
+
+```csharp
+Display<int>(10);
+Display<string>("Hello");
+Display<double>(10.5);
+```
+
+The type argument can often be omitted because the compiler can infer it:
+
+```csharp
+Display(10);
+Display("Hello");
+Display(10.5);
+```
+
+---
+
+# 6. Multiple Type Parameters
+
+A generic type can have multiple type parameters.
+
+```csharp
+class Pair<T1, T2>
+{
+    public T1 First { get; set; }
+    public T2 Second { get; set; }
+}
+```
+
+Usage:
+
+```csharp
+Pair<int, string> pair = new Pair<int, string>();
+```
+
+Here:
+
+```text
+T1 = int
+T2 = string
+```
+
+A common real-world example is:
+
+```csharp
+Dictionary<TKey, TValue>
+```
+
+For:
+
+```csharp
+Dictionary<int, string>
+```
+
+we have:
+
+```text
+TKey   = int
+TValue = string
+```
+
+---
+
+# 7. Generic Interfaces
+
+Interfaces can also be generic.
+
+```csharp
+interface IRepository<T>
+{
+    void Add(T item);
+    T GetById(int id);
+}
+```
+
+An implementation can specify the actual type:
+
+```csharp
+class UserRepository : IRepository<User>
+{
+    public void Add(User user)
+    {
+        // implementation
+    }
+
+    public User GetById(int id)
+    {
+        // implementation
+    }
+}
+```
+
+The same interface can be reused for different entities:
+
+```text
+IRepository<User>
+IRepository<Product>
+IRepository<Order>
+IRepository<Employee>
+```
+
+Generic interfaces are widely used in .NET application architecture.
+
+---
+
+# 8. Generic Constraints
+
+Sometimes a generic type should not accept every possible type.
+
+Generic constraints allow us to restrict the types that can be supplied.
+
+Example:
+
+```csharp
+public class Storage<T> where T : WarehouseItem
+{
+}
+```
+
+This means:
+
+> `T` must be `WarehouseItem` or a type derived from `WarehouseItem`.
+
+Example:
+
+```csharp
+class WarehouseItem
+{
+    public string Name { get; set; }
+}
+
+class Laptop : WarehouseItem
+{
+}
+
+class Mobile : WarehouseItem
+{
+}
+
+class Customer
+{
+}
+```
+
+Valid:
+
+```csharp
+Storage<WarehouseItem> storage1;
+Storage<Laptop> storage2;
+Storage<Mobile> storage3;
+```
+
+Invalid:
+
+```csharp
+Storage<Customer> storage4; // Compile-time error
+```
+
+## Why Are Constraints Important?
+
+Constraints do more than restrict the type.
+
+They provide the compiler with information about what members and operations are guaranteed to exist.
+
+For example:
+
+```csharp
+class Storage<T> where T : WarehouseItem
+{
+    public void Display(T item)
+    {
+        Console.WriteLine(item.Name);
+    }
+}
+```
+
+The compiler allows `item.Name` because `T` is guaranteed to be a `WarehouseItem` or derived type.
+
+Conceptually:
+
+```text
+T
+↓
+WarehouseItem or derived type
+↓
+WarehouseItem members are guaranteed
+```
+
+---
+
+# 9. Types of Generic Constraints
+
+## `where T : class`
+
+`T` must be a reference type.
+
+```csharp
+class Test<T> where T : class
+{
+}
+```
+
+Example:
+
+```csharp
+Test<string> test1; // Valid
+Test<int> test2;    // Invalid
+```
+
+---
+
+## `where T : struct`
+
+`T` must be a non-nullable value type.
+
+```csharp
+class Test<T> where T : struct
+{
+}
+```
+
+Example:
+
+```csharp
+Test<int> test1;       // Valid
+Test<double> test2;    // Valid
+Test<string> test3;    // Invalid
+```
+
+---
+
+## `where T : new()`
+
+`T` must have a **public parameterless constructor**.
+
+```csharp
+class Factory<T> where T : new()
+{
+    public T Create()
+    {
+        return new T();
+    }
+}
+```
+
+The `new()` constraint makes the following possible:
+
+```csharp
+new T();
+```
+
+---
+
+## Base Class Constraint
+
+```csharp
+class Repository<T> where T : Animal
+{
+}
+```
+
+`T` must be `Animal` or derive from `Animal`.
+
+```csharp
+Repository<Dog> dogRepository; // Valid
+Repository<Cat> catRepository; // Valid
+Repository<Car> carRepository; // Invalid
+```
+
+---
+
+## Interface Constraint
+
+```csharp
+class Service<T> where T : IDisposable
+{
+}
+```
+
+`T` must implement `IDisposable`.
+
+---
+
+## Multiple Constraints
+
+Multiple constraints can be combined:
+
+```csharp
+class Repository<T>
+    where T : Animal, IDisposable, new()
+{
+}
+```
+
+Here, `T` must:
+
+1. Derive from `Animal`
+2. Implement `IDisposable`
+3. Have a public parameterless constructor
+
+---
+
+# 10. Generic Collections
+
+Many commonly used .NET collections are generic.
+
+### List
+
+```csharp
+List<int> numbers = new List<int>();
+```
+
+### Dictionary
+
+```csharp
+Dictionary<int, string> students =
+    new Dictionary<int, string>();
+```
+
+### Queue
+
+```csharp
+Queue<int> queue = new Queue<int>();
+```
+
+### Stack
+
+```csharp
+Stack<string> stack = new Stack<string>();
+```
+
+### HashSet
+
+```csharp
+HashSet<int> numbers = new HashSet<int>();
+```
+
+Generic collections provide compile-time type safety.
+
+Example:
+
+```csharp
+List<int> numbers = new List<int>();
+
+numbers.Add(10);
+numbers.Add(20);
+numbers.Add("Hello"); // Compile-time error
+```
+
+---
+
+# 11. Generic vs Non-Generic Collections
+
+## Generic Collections
+
+Examples:
+
+```text
+List<T>
+Dictionary<TKey,TValue>
+Queue<T>
+Stack<T>
+HashSet<T>
+```
+
+They specify the type of data they store.
+
+```csharp
+List<int> numbers = new List<int>();
+
+numbers.Add(10);
+numbers.Add(20);
+numbers.Add("Hello"); // Compile-time error
+```
+
+---
+
+## Non-Generic Collections
+
+Examples:
+
+```text
+ArrayList
+Hashtable
+Queue
+Stack
+```
+
+These older collections primarily operate using `object`.
+
+```csharp
+ArrayList list = new ArrayList();
+
+list.Add(10);
+list.Add("Hello");
+list.Add(10.5);
+```
+
+Different types can be stored.
+
+When retrieving values, casting may be required:
+
+```csharp
+int value = (int)list[0];
+```
+
+### Comparison
+
+| Feature         | Generic Collections | Non-Generic Collections     |
+| --------------- | ------------------- | --------------------------- |
+| Type safety     | Strong              | Weak                        |
+| Type checking   | Compile time        | Often runtime               |
+| Casting         | Usually unnecessary | Often required              |
+| Boxing/unboxing | Can be reduced      | More likely                 |
+| Readability     | Higher              | Lower                       |
+| Modern usage    | Preferred           | Mainly legacy/compatibility |
+
+Generic collections are generally preferred in modern C#.
+
+---
+
+# 12. Boxing and Unboxing
+
+Value types include:
+
+```text
+int
+double
+bool
+struct
+```
+
+Reference types include:
+
+```text
+class
+string
+array
+interface
+```
+
+When a value type is converted to `object`, boxing can occur.
+
+```csharp
+int number = 10;
+
+object obj = number;
+```
+
+Conceptually:
+
+```text
+int
+ ↓
+Boxing
+ ↓
+object
+```
+
+Retrieving the value:
+
+```csharp
+int result = (int)obj;
+```
+
+involves unboxing:
+
+```text
+object
+ ↓
+Unboxing
+ ↓
+int
+```
+
+Non-generic collections can cause boxing and unboxing because they operate around `object`.
+
+Generic collections such as:
+
+```csharp
+List<int>
+```
+
+can avoid this object-based boxing/unboxing path during normal usage.
+
+---
+
+# 13. Type Inference
+
+C# can often determine the generic type automatically.
+
+Consider:
+
+```csharp
+static void Display<T>(T value)
+{
+    Console.WriteLine(value);
+}
+```
+
+Explicit type argument:
+
+```csharp
+Display<int>(10);
+```
+
+Type inference:
+
+```csharp
+Display(10);
+```
+
+The compiler determines:
+
+```text
+10
+↓
+int
+↓
+T = int
+```
+
+This is called **generic type inference**.
+
+---
+
+# 14. Generics and Inheritance
+
+Suppose:
+
+```csharp
+class Animal
+{
+}
+
+class Dog : Animal
+{
+}
+
+class Cat : Animal
+{
+}
+```
+
+It might seem that:
+
+```csharp
+List<Dog>
+```
+
+should be assignable to:
+
+```csharp
+List<Animal>
+```
+
+However:
+
+```csharp
+List<Dog> dogs = new List<Dog>();
+
+List<Animal> animals = dogs; // Compile-time error
+```
+
+Why?
+
+If this conversion were allowed:
+
+```csharp
+animals.Add(new Cat());
+```
+
+we could insert a `Cat` into a collection that is actually a `List<Dog>`.
+
+That would violate type safety.
+
+Therefore:
+
+```text
+List<Dog> ≠ List<Animal>
+```
+
+`List<T>` is **invariant**.
+
+---
+
+# 15. Variance
+
+Variance describes how generic types relate when their type arguments have inheritance relationships.
+
+There are three concepts:
+
+### Invariance
+
+```text
+Generic<Dog>
+    ≠
+Generic<Animal>
+```
+
+`List<T>` is invariant.
+
+### Covariance
+
+Covariance allows a generic abstraction to follow the inheritance direction.
+
+For example:
+
+```csharp
+IEnumerable<Dog> dogs = new List<Dog>();
+
+IEnumerable<Animal> animals = dogs;
+```
+
+`IEnumerable<T>` is covariant and is declared using:
+
+```csharp
+IEnumerable<out T>
+```
+
+### Contravariance
+
+Contravariance allows certain conversions in the opposite direction for input-oriented abstractions.
+
+It is represented using:
+
+```csharp
+in T
+```
+
+A commonly encountered example is:
+
+```csharp
+IComparer<T>
+```
+
+Variance is particularly important when working with generic interfaces and delegates.
+
+---
+
+# 16. Generics and LINQ
+
+Generics are deeply integrated with LINQ.
+
+Example:
+
+```csharp
+List<int> numbers = new List<int>
+{
+    1, 2, 3, 4, 5
+};
+
+var result = numbers.Where(x => x > 2);
+```
+
+Conceptually:
+
+```text
+List<int>
+    ↓
+IEnumerable<int>
+    ↓
+LINQ
+    ↓
+Where(...)
+```
+
+Many LINQ methods operate on:
+
+```csharp
+IEnumerable<T>
+```
+
+Understanding Generics therefore makes LINQ easier to understand.
+
+---
+
+# 17. Generic Delegates
+
+C# provides several built-in generic delegates.
+
+### `Action<T>`
+
+Represents a method that accepts parameters and returns no value.
+
+```csharp
+Action<int> print = x => Console.WriteLine(x);
+
+print(10);
+```
+
+### `Func<T, TResult>`
+
+Represents a method that accepts parameters and returns a value.
+
+```csharp
+Func<int, int> square = x => x * x;
+
+Console.WriteLine(square(5));
+```
+
+Here:
+
+```text
+T = int
+TResult = int
+```
+
+### `Predicate<T>`
+
+Represents a method that returns a Boolean result.
+
+```csharp
+Predicate<int> isEven = x => x % 2 == 0;
+
+Console.WriteLine(isEven(10));
+```
+
+---
+
+# 18. Generics in .NET
+
+Generics are supported directly by the .NET type system and CLR.
+
+They are not simply a text-replacement mechanism.
+
+For example:
+
+```csharp
+List<int>
+List<string>
+```
+
+are constructed generic types based on:
+
+```csharp
+List<T>
+```
+
+The runtime and JIT compiler have specific support for generic types and methods.
+
+Implementation details differ between value-type and reference-type generic instantiations and can affect code generation and performance.
+
+---
+
+# 19. Advantages of Generics
+
+### Type Safety
+
+Invalid types can be rejected during compilation.
+
+### Reusability
+
+The same implementation can work with many types.
+
+### Reduced Casting
+
+The compiler knows the expected type.
+
+### Reduced Boxing/Unboxing
+
+Generic collections can avoid unnecessary object conversions for value types.
+
+### Readability
+
+Compare:
+
+```csharp
+ArrayList employees;
+```
+
+with:
+
+```csharp
+List<Employee> employees;
+```
+
+The second declaration communicates the expected element type directly.
+
+### Maintainability
+
+Type requirements become part of the API itself.
+
+### Performance
+
+Generics can improve performance by reducing boxing/unboxing and allowing the runtime/JIT to generate efficient code.
+
+---
+
+# 20. Common Interview Questions
+
+## Fundamentals
+
+1. What are Generics?
+2. Why are Generics required?
+3. What is `T`?
+4. What is a generic class?
+5. What is a generic method?
+6. What is a generic interface?
+7. Can a generic class have multiple type parameters?
+8. Can a generic method have multiple type parameters?
+9. What is type inference?
+10. What is a constructed generic type?
+
+## Constraints
+
+11. What are generic constraints?
+12. Why do we use `where T : ...`?
+13. Explain `where T : class`.
+14. Explain `where T : struct`.
+15. Explain `where T : new()`.
+16. What is a base-class constraint?
+17. What is an interface constraint?
+18. Can multiple generic constraints be applied?
+19. Why does a constraint allow access to members of the constrained type?
+
+## Collections
+
+20. Generic vs non-generic collections?
+21. Generic collections vs `object`?
+22. Why is `List<T>` preferred over `ArrayList`?
+23. What is the difference between `Dictionary<TKey,TValue>` and `Hashtable`?
+24. Why are generic collections generally more type-safe?
+25. How do generic collections improve performance?
+
+## Boxing and Runtime
+
+26. What is boxing?
+27. What is unboxing?
+28. How can Generics reduce boxing/unboxing?
+29. How are Generics handled by the CLR?
+30. What is the role of the JIT compiler with Generics?
+31. Are Generics implemented only at compile time?
+
+## Advanced Type System
+
+32. What is invariance?
+33. What is covariance?
+34. What is contravariance?
+35. Why is `List<Dog>` not assignable to `List<Animal>`?
+36. What do `in` and `out` mean?
+37. Which generic interfaces support covariance?
+38. Which generic interfaces support contravariance?
+39. How does variance apply to delegates?
+
+## Real-World .NET
+
+40. How are Generics used in LINQ?
+41. What are `Func<T>`, `Action<T>`, and `Predicate<T>`?
+42. How are Generics used with Dependency Injection?
+43. What is a Generic Repository?
+44. How are Generics used in ASP.NET Core?
+45. What is `ILogger<T>`?
+46. What is `IOptions<T>`?
+47. How are generic services designed?
+
+---
+
+# Key Takeaways
+
+```text
+Generics
+    ↓
+Reusable code + Type Safety
+    ↓
+Compile-time type checking
+    ↓
+Less casting
+    ↓
+Reduced boxing/unboxing
+    ↓
+Better maintainability
+    ↓
+Often better performance
+```
+
+### Core concepts to remember
+
+**`T`**
+A type parameter representing a type.
+
+**Generic class**
+
+```csharp
+class Storage<T>
+```
+
+**Generic method**
+
+```csharp
+void Display<T>(T value)
+```
+
+**Generic constraint**
+
+```csharp
+where T : WarehouseItem
+```
+
+**Generic collection**
+
+```csharp
+List<int>
+```
+
+**Non-generic collection**
+
+```csharp
+ArrayList
+```
+
+**Covariance**
+
+```csharp
+IEnumerable<out T>
+```
+
+**Contravariance**
+
+```csharp
+IComparer<in T>
+```
+
+---
+
+## Learning Path
+
+A good order for studying Generics is:
+
+```text
+Generics
+   │
+   ├── Fundamentals
+   │   ├── Type Parameters
+   │   ├── Generic Classes
+   │   ├── Generic Methods
+   │   ├── Generic Interfaces
+   │   └── Type Inference
+   │
+   ├── Constraints
+   │   ├── class
+   │   ├── struct
+   │   ├── new()
+   │   ├── Base Class
+   │   └── Interface
+   │
+   ├── Collections
+   │   ├── List<T>
+   │   ├── Dictionary<TKey,TValue>
+   │   ├── Queue<T>
+   │   ├── Stack<T>
+   │   └── HashSet<T>
+   │
+   ├── Type System
+   │   ├── Invariance
+   │   ├── Covariance
+   │   └── Contravariance
+   │
+   ├── Runtime & Performance
+   │   ├── Boxing
+   │   ├── Unboxing
+   │   ├── JIT
+   │   └── Generic Code Generation
+   │
+   └── Advanced .NET
+       ├── Generic Delegates
+       ├── LINQ
+       ├── Dependency Injection
+       ├── Generic Repository
+       └── Generic Math
+```
+
+> **Core principle:** Generics are not simply a mechanism for avoiding duplicate code. They allow developers to create reusable abstractions while preserving type information, enabling compile-time safety and allowing the runtime to work efficiently with different types.
