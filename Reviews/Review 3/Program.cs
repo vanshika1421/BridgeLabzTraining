@@ -32,6 +32,7 @@ class Program
         }
 
         Console.WriteLine("Original Clause: " + obligation.OriginalClause);
+        
 
         Console.ReadLine();
     }
@@ -52,4 +53,3 @@ class Program
 // Grouping obligations by the party who owes the money
 // and calculating the total monetary obligation
 // for each party.
-//LINQ + Lambda for filtering, sorting, grouping, and totals

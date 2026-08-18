@@ -8,12 +8,7 @@
 
     public string OriginalClause { get; set; }
 
-    public Obligation(
-        string debtor,
-        string creditor,
-        double amount,
-        DateTime? deadline,
-        string originalClause)
+    public Obligation(string debtor,string creditor,double amount,DateTime? deadline,string originalClause)
     {
         Debtor = debtor;
         Creditor = creditor;
@@ -22,11 +17,5 @@
         OriginalClause = originalClause;
     }
 
-    public override string ToString()
-    {
-        return "Debtor: " + Debtor +
-               ", Creditor: " + Creditor +
-               ", Amount: $" + Amount +
-               ", Deadline: " + Deadline;
-    }
+    
 }

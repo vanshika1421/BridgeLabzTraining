@@ -64,8 +64,8 @@ public class ClauseParser
             DateTime referenceDate;
 
             if (DateTime.TryParse(
-                dateMatch.Value,
-                out referenceDate))
+      dateMatch.Value,
+      out referenceDate))
             {
                 if (daysMatch.Success)
                 {
@@ -81,13 +81,6 @@ public class ClauseParser
                 }
             }
         }
-
-        return new Obligation(
-            debtor,
-            creditor,
-            amount,
-            deadline,
-            clause
-        );
+            return new Obligation(debtor, creditor,  amount, deadline, clause  );
     }
 }
