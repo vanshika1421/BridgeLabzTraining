@@ -2,37 +2,33 @@
 
 public class ClauseIndex<T>
 {
-    private Dictionary<string, List<T>> owedBy;
-    private Dictionary<string, List<T>> owedTo;
-
-    public ClauseIndex()
-    {
-        owedBy = new Dictionary<string, List<T>>();
-        owedTo = new Dictionary<string, List<T>>();
-    }
+    private readonly Dictionary<string, List<T>> owedBy = new();
+    private readonly Dictionary<string, List<T>> owedTo = new();
 
     public void Add(string debtor, string creditor, T obligation)
     {
-        if (!owedBy.ContainsKey(debtor))
+        if (!owedBy.TryGetValue(debtor, out List<T>? debtorObligations))
         {
-            owedBy[debtor] = new List<T>();
+            debtorObligations = new List<T>();
+            owedBy[debtor] = debtorObligations;
         }
 
-        owedBy[debtor].Add(obligation);
+        debtorObligations.Add(obligation);
 
-        if (!owedTo.ContainsKey(creditor))
+        if (!owedTo.TryGetValue(creditor, out List<T>? creditorObligations))
         {
-            owedTo[creditor] = new List<T>();
+            creditorObligations = new List<T>();
+            owedTo[creditor] = creditorObligations;
         }
 
-        owedTo[creditor].Add(obligation);
+        creditorObligations.Add(obligation);
     }
 
     public List<T> GetOwedBy(string party)
     {
-        if (owedBy.ContainsKey(party))
+        if (owedBy.TryGetValue(party, out List<T>? obligations))
         {
-            return owedBy[party];
+            return obligations;
         }
 
         return new List<T>();
@@ -40,11 +36,8 @@ public class ClauseIndex<T>
 
     public List<T> GetOwedTo(string party)
     {
-        if (owedTo.ContainsKey(party))
-        {
-            return owedTo[party];
-        }
-
-        return new List<T>();
+        return owedTo.TryGetValue(party, out List<T>? obligations)
+            ? obligations
+            : new List<T>();
     }
 }
