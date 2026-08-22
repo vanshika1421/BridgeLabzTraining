@@ -42,8 +42,21 @@ namespace Exceptions
             //{
             //    Console.WriteLine(e.Message);
             //}
-            NestedTryCatch n = new NestedTryCatch();
-            n.DivideArray(arr, 0);
+            //NestedTryCatch n = new NestedTryCatch();
+            //n.DivideArray(arr, 0);
+            BankTransaction b  = new BankTransaction();
+
+            try
+            {
+                b.Withdraw(-820, 100);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            catch (InsufficientFundsException e) { 
+            Console.WriteLine(e.Message);
+            }
 
         }
 
