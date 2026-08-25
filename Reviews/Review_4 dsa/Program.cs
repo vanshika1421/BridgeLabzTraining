@@ -10,35 +10,16 @@ namespace DSA_Test
             Console.WriteLine("E-Commerce System");
             Console.WriteLine("------------------");
 
-            // ---------------- CART ----------------
 
-            LinkedList<Node> cart =
-                new LinkedList<Node>();
+            LinkedList<Node> cart =  new LinkedList<Node>();
 
-            ShoppingCart product =
-                new ShoppingCart(
-                    1,
-                    "Laptop",
-                    1,
-                    50000);
+            ShoppingCart product =   new ShoppingCart(1,"Laptop", 1,50000);
 
-            Node laptop = new Node(
-                "SKU001",
-                "Laptop",
-                50000,
-                4.5);
+            Node laptop = new Node("SKU001","Laptop", 50000,   4.5);
 
-            Node phone = new Node(
-                "SKU002",
-                "Phone",
-                30000,
-                4.2);
+            Node phone = new Node("SKU002","Phone",30000,4.2);
 
-            Node tablet = new Node(
-                "SKU003",
-                "Tablet",
-                20000,
-                4.0);
+            Node tablet = new Node("SKU003", "Tablet", 20000,   4.0);
 
             product.Additems(cart, laptop);
             product.Additems(cart, phone);
@@ -48,16 +29,10 @@ namespace DSA_Test
             product.Display(cart);
 
             // Increase quantity
-            product.IncreaseItemQuantity(
-                cart,
-                1,
-                2);
+            product.IncreaseItemQuantity(  cart,  1, 2);
 
             // Decrease quantity
-            product.DecreaseItemQuantity(
-                cart,
-                2,
-                1);
+            product.DecreaseItemQuantity(  cart,   2,  1);
 
             // Move product down
             product.MoveDown(cart, 3);
@@ -65,38 +40,24 @@ namespace DSA_Test
             Console.WriteLine("\nUpdated Cart:");
             product.Display(cart);
 
-            Console.WriteLine(
-                "\nTotal = " +
-                product.CalculateTotal(cart));
+            Console.WriteLine(   "\nTotal = " +  product.CalculateTotal(cart));
 
 
-            // ---------------- RECENTLY VIEWED ----------------
 
-            Stack<Node> stack =
-                new Stack<Node>();
+            Stack<Node> stack =   new Stack<Node>();
 
             MostRecentsProducts recent =
                 new MostRecentsProducts(3);
 
-            recent.AddViewdProducts(
-                stack,
-                new Node("MacBook"));
+            recent.AddViewdProducts( stack,new Node("MacBook"));
 
-            recent.AddViewdProducts(
-                stack,
-                new Node("Victus Laptop"));
+            recent.AddViewdProducts(  stack,new Node("Victus Laptop"));
 
-            recent.AddViewdProducts(
-                stack,
-                new Node("iPhone"));
+            recent.AddViewdProducts( stack,new Node("iPhone"));
 
-            recent.AddViewdProducts(
-                stack,
-                new Node("iPad"));
+            recent.AddViewdProducts( stack,  new Node("iPad"));
 
-            Console.WriteLine(
-                "\nLatest Viewed: " +
-                recent.getLatestViewedProduct(stack));
+            Console.WriteLine( "\nLatest Viewed: " + recent.getLatestViewedProduct(stack));
 
 
             // ---------------- PROMOTIONS ----------------

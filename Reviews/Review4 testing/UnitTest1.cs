@@ -237,7 +237,23 @@ public void test_to_remove_products_from_map()
 
             Assert.That(  queue.Count, Is.EqualTo(0));
         }
+        [Test]
+        public void test_integrated_product_lookup_to_recently_viewed()
+        {
+            Dictionary<int, String> map = new Dictionary<int, String>();
 
+            search.AddProduct(map, 5, "iPad");
+
+            String product = search.SearchProductById(map, 5);
+
+            Stack<Node> stack = new Stack<Node>();
+            stack.Push(new Node(product));
+
+            String latest = most.getLatestViewedProduct(stack);
+
+            Assert.That(product, Is.EqualTo("iPad"));
+            Assert.That(latest, Is.EqualTo("iPad"));
+        }
 
 
     }
