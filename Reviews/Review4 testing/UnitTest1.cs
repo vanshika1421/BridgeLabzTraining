@@ -79,22 +79,20 @@ namespace Testing
 
         [Test]
         public void test_to_check_LinkedList_sorting()
-
         {
             LinkedList<Node> l = new LinkedList<Node>();
+
             l.AddLast(new Node(4));
             l.AddLast(new Node(2));
             l.AddLast(new Node(1));
             l.AddLast(new Node(3));
-            LinkedList<Node> list = new LinkedList<Node>();
-            list.AddLast(new Node(1));
-            list.AddLast(new Node(2));
-            list.AddLast(new Node(3));
-            list.AddLast(new Node(4));
+
             LinkedList<Node> ans = sort.SortById(l);
-            ans.ToArray();
-            list.ToArray();
-            Assert.That(Array.Equals(ans, list), Is.False);
+
+            Assert.That(ans.First.Value.data, Is.EqualTo(1));
+            Assert.That(ans.First.Next.Value.data, Is.EqualTo(2));
+            Assert.That(ans.First.Next.Next.Value.data, Is.EqualTo(3));
+            Assert.That(ans.Last.Value.data, Is.EqualTo(4));
         }
         [Test]
 
