@@ -1,81 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.IO;
 
 namespace OnlinExamProctoring
 {
-    public class GradingSession : IDisposable
-    {
-        private StreamWriter resultsWriter;
-        private StreamWriter flaggedWriter;
-        private bool disposed = false;
-
-        public GradingSession(string resultsFile, string flaggedFile)
-        {
-            resultsWriter = new StreamWriter(resultsFile);
-            flaggedWriter = new StreamWriter(flaggedFile);
-        }
-
-        public void WriteResult(string message)
-        {
-            resultsWriter.WriteLine(message);
-            resultsWriter.Flush();
-        }
-
-        public void WriteFlagged(string message)
-        {
-            flaggedWriter.WriteLine(message);
-            flaggedWriter.Flush();
-        }
-
-        public void Dispose()
-        {
-            if (disposed)
-                return;
-
-            try
-            {
-                if (resultsWriter != null)
-                {
-                    resultsWriter.Flush();
-                    resultsWriter.Close();
-                }
-            }
-            catch
-            {
-                Console.WriteLine("Error while closing results file.");
-            }
-
-            try
-            {
-                if (flaggedWriter != null)
-                {
-                    flaggedWriter.Flush();
-                    flaggedWriter.Close();
-                }
-            }
-            catch
-            {
-                Console.WriteLine("Error while closing flagged file.");
-            }
-
-            disposed = true;
-            GC.SuppressFinalize(this);
-        }
-
-        ~GradingSession()
-        {
-            Dispose();
-        }
-    }
-
     public class Program
     {
         public static void Main(string[] args)
         {
             Console.WriteLine("Online Exam Proctoring & Grading Engine");
             Console.WriteLine("---------------------------------------");
+
+            // ---------------- SUBMISSION DETAILS ----------------
 
             Console.WriteLine("Enter number of submissions");
             int submissions = int.Parse(Console.ReadLine());
@@ -97,6 +33,8 @@ namespace OnlinExamProctoring
             sub.StudentId = 1;
             sub.StartTime = start;
             sub.EndTime = end;
+
+            // ---------------- QUESTION DETAILS ----------------
 
             Console.WriteLine("Enter Question id");
             int questionId = int.Parse(Console.ReadLine());
@@ -120,6 +58,8 @@ namespace OnlinExamProctoring
                 correct,
                 negativeMarking);
 
+            // ---------------- STUDENT ANSWER ----------------
+
             Console.WriteLine("Enter Student Answer");
             string studentAnswer = Console.ReadLine();
 
@@ -128,22 +68,38 @@ namespace OnlinExamProctoring
                     questionId,
                     studentAnswer));
 
+            // ---------------- ENGINE ----------------
+
             ExamGradingEngine engine =
                 new ExamGradingEngine();
 
             engine.GradingCompleted +=
                 (sender, e) =>
-                Console.WriteLine("Grading Completed");
+                {
+                    Console.WriteLine(
+                        "Grading Completed");
+                };
 
             engine.IntegrityViolationFlagged +=
                 (sender, e) =>
-                Console.WriteLine("Integrity Violation Flagged");
+                {
+                    Console.WriteLine(
+                        "Integrity Violation Flagged");
+                };
 
             List<Question> questions =
-                new List<Question> { q };
+                new List<Question>
+                {
+                    q
+                };
 
             List<Submissions> submissionList =
-                new List<Submissions> { sub };
+                new List<Submissions>
+                {
+                    sub
+                };
+
+            // ---------------- PROCESS BATCH ----------------
 
             Console.WriteLine();
             Console.WriteLine("Processing Submission...");
@@ -153,18 +109,31 @@ namespace OnlinExamProctoring
                 questions,
                 submissionList);
 
+            // ---------------- LINQ ANALYSIS ----------------
+
             Console.WriteLine();
             Console.WriteLine("LINQ CLASS ANALYSIS");
+            Console.WriteLine("-------------------");
 
-            Console.WriteLine(
-                "Class Average: " +
-                engine.CalculateAverageUsingLinq(
-                    submissionList));
+            try
+            {
+                double average =
+                    engine.CalculateAverageUsingLinq(
+                        submissionList);
+
+                Console.WriteLine(
+                    "Class Average: " + average);
+            }
+            catch (DivideByZeroException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             var distribution =
                 engine.GetGradeDistribution(
                     submissionList);
 
+            Console.WriteLine();
             Console.WriteLine("Grade Distribution:");
 
             foreach (var item in distribution)
@@ -173,19 +142,25 @@ namespace OnlinExamProctoring
                     item.Key + ": " + item.Value);
             }
 
-            Console.WriteLine();
-
             int hardestQuestion =
                 engine.GetLowestCorrectRateQuestion(
                     questions,
                     submissionList);
 
+            Console.WriteLine();
+
             Console.WriteLine(
                 "Hardest Question ID: " +
                 hardestQuestion);
 
+            // ---------------- REFLECTION ----------------
+
             Console.WriteLine();
-            Console.WriteLine("Reflection - Question Methods");
+            Console.WriteLine("REFLECTION");
+            Console.WriteLine("----------");
+
+            Console.WriteLine();
+            Console.WriteLine("Question Methods:");
 
             Type questionType =
                 typeof(Question);
@@ -197,8 +172,7 @@ namespace OnlinExamProctoring
             }
 
             Console.WriteLine();
-            Console.WriteLine(
-                "Reflection - Submission Properties");
+            Console.WriteLine("Submission Properties:");
 
             Type submissionType =
                 typeof(Submissions);
@@ -209,11 +183,12 @@ namespace OnlinExamProctoring
                 Console.WriteLine(property);
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Custom Attributes");
+            // ---------------- CUSTOM ATTRIBUTES ----------------
 
-            Type engineType =
-                typeof(ExamGradingEngine);
+            Console.WriteLine();
+            Console.WriteLine("Custom Attributes:");
+
+            Type engineType = typeof(ExamGradingEngine);
 
             MethodInfo processMethod =
                 engineType.GetMethod(
@@ -224,17 +199,25 @@ namespace OnlinExamProctoring
 
             if (processMethod != null)
             {
-                foreach (object attribute in
-                         processMethod.GetCustomAttributes())
+                object[] attributes =
+                    Attribute.GetCustomAttributes(processMethod);
+
+                foreach (object attribute in attributes)
                 {
-                    Console.WriteLine(attribute);
+                    Console.WriteLine(
+                        attribute.GetType().Name);
                 }
             }
+            else
+            {
+                Console.WriteLine(
+                    "ProcessQuestion method not found.");
+            }
+
+            // ---------------- CLASS AVERAGE GUARD ----------------
 
             Console.WriteLine();
-
-            Console.WriteLine(
-                "Enter total students in class");
+            Console.WriteLine("Enter total students in class");
 
             int total =
                 int.Parse(Console.ReadLine());
@@ -255,8 +238,11 @@ namespace OnlinExamProctoring
                 Console.WriteLine(ex.Message);
             }
 
+            // ---------------- GRADING SESSION ----------------
+
             Console.WriteLine();
             Console.WriteLine("Grading Session");
+            Console.WriteLine("---------------");
 
             using (GradingSession session =
                    new GradingSession(
@@ -271,6 +257,7 @@ namespace OnlinExamProctoring
             }
 
             Console.WriteLine();
+            Console.WriteLine("Results exported successfully.");
             Console.WriteLine("Program completed.");
         }
     }
