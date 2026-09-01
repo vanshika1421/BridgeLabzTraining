@@ -1,12 +1,80 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.IO;
 
 namespace OnlinExamProctoring
 {
+    public class GradingSession : IDisposable
+    {
+        private StreamWriter resultsWriter;
+        private StreamWriter flaggedWriter;
+        private bool disposed = false;
+
+        public GradingSession(string resultsFile, string flaggedFile)
+        {
+            resultsWriter = new StreamWriter(resultsFile);
+            flaggedWriter = new StreamWriter(flaggedFile);
+        }
+
+        public void WriteResult(string message)
+        {
+            resultsWriter.WriteLine(message);
+            resultsWriter.Flush();
+        }
+
+        public void WriteFlagged(string message)
+        {
+            flaggedWriter.WriteLine(message);
+            flaggedWriter.Flush();
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+
+            try
+            {
+                if (resultsWriter != null)
+                {
+                    resultsWriter.Flush();
+                    resultsWriter.Close();
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                if (flaggedWriter != null)
+                {
+                    flaggedWriter.Flush();
+                    flaggedWriter.Close();
+                }
+            }
+            catch
+            {
+            }
+
+            disposed = true;
+            GC.SuppressFinalize(this);
+        }
+
+        ~GradingSession()
+        {
+            Dispose();
+        }
+    }
+
     public class Program
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("Online Exam Proctoring & Grading Engine");
+            Console.WriteLine("---------------------------------------");
+
             Console.WriteLine("Enter number of submissions");
             int submissions = int.Parse(Console.ReadLine());
 
@@ -19,13 +87,14 @@ namespace OnlinExamProctoring
             Console.WriteLine("Enter end time:");
             DateTime end = DateTime.Parse(Console.ReadLine());
 
-            TimeSpan duration = end - start;
-
             Submissions sub = new Submissions(
                 submissions,
                 tabswitch,
-                true
-            );
+                true);
+
+            sub.StudentId = 1;
+            sub.StartTime = start;
+            sub.EndTime = end;
 
             Console.WriteLine("Enter Question id");
             int questionId = int.Parse(Console.ReadLine());
@@ -47,64 +116,143 @@ namespace OnlinExamProctoring
                 type,
                 weight,
                 correct,
-                negativeMarking
-            );
+                negativeMarking);
 
-            Submissions.CreateScoringRule score =
-                Submissions.CreateScore;
+            Console.WriteLine("Enter Student Answer");
+            string studentAnswer = Console.ReadLine();
 
-            Func<Submissions, double> result =
-                score(1.0);
+            sub.Answers.Add(
+                new KeyValuePair<int, string>(
+                    questionId,
+                    studentAnswer));
 
-            Console.WriteLine(result(sub));
+            ExamGradingEngine engine =
+                new ExamGradingEngine();
 
-            Type typee = typeof(Question);
+            engine.GradingCompleted +=
+                (sender, e) =>
+                Console.WriteLine("Grading Completed");
 
-            MethodInfo[] m = typee.GetMethods();
+            engine.IntegrityViolationFlagged +=
+                (sender, e) =>
+                Console.WriteLine("Integrity Violation Flagged");
 
-            foreach (MethodInfo mm in m)
+            List<Question> questions =
+                new List<Question> { q };
+
+            List<Submissions> submissionList =
+                new List<Submissions> { sub };
+
+            Console.WriteLine();
+            Console.WriteLine("Processing Submission...");
+            Console.WriteLine();
+
+            engine.ProcessBatch(
+                questions,
+                submissionList);
+
+            Console.WriteLine();
+            Console.WriteLine("LINQ CLASS ANALYSIS");
+
+            List<double> scores =
+                new List<double> { 80, 90, 70 };
+
+            Console.WriteLine(
+                "Class Average: " +
+                engine.CalculateAverageUsingLinq(scores));
+
+            var distribution =
+                engine.GetGradeDistribution(scores);
+
+            Console.WriteLine("Grade Distribution:");
+
+            foreach (var item in distribution)
             {
-                Console.WriteLine(mm);
+                Console.WriteLine(
+                    item.Key + ": " + item.Value);
             }
 
+            Console.WriteLine();
+            Console.WriteLine("Reflection - Question Methods");
+
+            Type questionType =
+                typeof(Question);
+
+            foreach (MethodInfo method in
+                     questionType.GetMethods())
+            {
+                Console.WriteLine(method);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(
+                "Reflection - Submission Properties");
+
+            Type submissionType =
+                typeof(Submissions);
+
+            foreach (PropertyInfo property in
+                     submissionType.GetProperties())
+            {
+                Console.WriteLine(property);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Custom Attributes");
+
+            Type engineType =
+                typeof(ExamGradingEngine);
+
+            MethodInfo processMethod =
+                engineType.GetMethod(
+                    "ProcessQuestion",
+                    BindingFlags.Instance |
+                    BindingFlags.Public |
+                    BindingFlags.NonPublic);
+
+            if (processMethod != null)
+            {
+                foreach (object attribute in
+                         processMethod.GetCustomAttributes())
+                {
+                    Console.WriteLine(attribute);
+                }
+            }
+
+            Console.WriteLine();
             Console.WriteLine("Enter total students in class");
-            int total = int.Parse(Console.ReadLine());
 
-            ExamGradingEngine e = new ExamGradingEngine();
+            int total =
+                int.Parse(Console.ReadLine());
 
-            int totalScore = 10000;
-
-            e.ComputingClassAverageScore(
-                total,
-                totalScore
-            );
-
-            Type type2 = typeof(Submissions);
-
-            MethodInfo[] m2 = type2.GetMethods();
-
-            foreach (MethodInfo m3 in m2)
+            try
             {
-                Console.WriteLine(m3);
+                engine.ComputingClassAverageScore(
+                    total,
+                    10000);
+            }
+            catch (DivideByZeroException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
-            Console.WriteLine("Properties using reflection");
+            Console.WriteLine();
+            Console.WriteLine("Grading Session");
 
-            PropertyInfo[] p = type2.GetProperties();
-
-            foreach (PropertyInfo p3 in p)
+            using (GradingSession session =
+                   new GradingSession(
+                       "results.txt",
+                       "flagged.txt"))
             {
-                Console.WriteLine(p3);
+                session.WriteResult(
+                    "Grading session completed.");
+
+                session.WriteFlagged(
+                    "Flagged submissions are recorded separately.");
             }
 
-            Console.WriteLine("Get custom Attributes");
-
-            var attributes = type2.GetCustomAttributes();
-
-            foreach (var attr in attributes)
-            {
-                Console.WriteLine(attr);
-            }
+            Console.WriteLine();
+            Console.WriteLine("Program completed.");
         }
     }
 }
