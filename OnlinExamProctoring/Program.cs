@@ -44,6 +44,7 @@ namespace OnlinExamProctoring
             }
             catch
             {
+                Console.WriteLine("Error while closing results file.");
             }
 
             try
@@ -56,6 +57,7 @@ namespace OnlinExamProctoring
             }
             catch
             {
+                Console.WriteLine("Error while closing flagged file.");
             }
 
             disposed = true;
@@ -154,15 +156,14 @@ namespace OnlinExamProctoring
             Console.WriteLine();
             Console.WriteLine("LINQ CLASS ANALYSIS");
 
-            List<double> scores =
-                new List<double> { 80, 90, 70 };
-
             Console.WriteLine(
                 "Class Average: " +
-                engine.CalculateAverageUsingLinq(scores));
+                engine.CalculateAverageUsingLinq(
+                    submissionList));
 
             var distribution =
-                engine.GetGradeDistribution(scores);
+                engine.GetGradeDistribution(
+                    submissionList);
 
             Console.WriteLine("Grade Distribution:");
 
@@ -171,6 +172,17 @@ namespace OnlinExamProctoring
                 Console.WriteLine(
                     item.Key + ": " + item.Value);
             }
+
+            Console.WriteLine();
+
+            int hardestQuestion =
+                engine.GetLowestCorrectRateQuestion(
+                    questions,
+                    submissionList);
+
+            Console.WriteLine(
+                "Hardest Question ID: " +
+                hardestQuestion);
 
             Console.WriteLine();
             Console.WriteLine("Reflection - Question Methods");
@@ -220,16 +232,23 @@ namespace OnlinExamProctoring
             }
 
             Console.WriteLine();
-            Console.WriteLine("Enter total students in class");
+
+            Console.WriteLine(
+                "Enter total students in class");
 
             int total =
                 int.Parse(Console.ReadLine());
 
             try
             {
-                engine.ComputingClassAverageScore(
-                    total,
-                    10000);
+                int average =
+                    engine.ComputingClassAverageScore(
+                        total,
+                        10000);
+
+                Console.WriteLine(
+                    "Class Average Score: " +
+                    average);
             }
             catch (DivideByZeroException ex)
             {
@@ -245,7 +264,7 @@ namespace OnlinExamProctoring
                        "flagged.txt"))
             {
                 session.WriteResult(
-                    "Grading session completed.");
+                    $"Student {sub.StudentId} Score: {sub.Score}");
 
                 session.WriteFlagged(
                     "Flagged submissions are recorded separately.");

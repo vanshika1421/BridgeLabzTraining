@@ -1,36 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OnlinExamProctoring
 {
-    internal class Unique : System.Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class QuestionWeightAttribute : Attribute
     {
-        public string Message {  get; set; }
-       
-       public void UniqueAttribute(String message)
-        {
-            Message = message;
-        }
-    }
-        internal class NegativeMarking
-    {
-       
-        public double negativemark { get; set; }
-        public void NegativeMarkingAttribute(double marks)
-        {
-            negativemark = marks;
-        }
-        }
-    internal class QuestionWeight
-    {
-        public double Weight { get; set; }
-        public void QuestionWeightAttribute(double weight)
+        public double Weight { get; }
+
+        public QuestionWeightAttribute(double weight)
         {
             Weight = weight;
         }
     }
 
+    [AttributeUsage(AttributeTargets.Method)]
+    public class NegativeMarkingAttribute : Attribute
+    {
+        public double Marks { get; }
 
-    
+        public NegativeMarkingAttribute(double marks)
+        {
+            Marks = marks;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
+    public class UniqueAttribute : Attribute
+    {
+        public string Message { get; }
+
+        public UniqueAttribute(string message)
+        {
+            Message = message;
+        }
+    }
 }

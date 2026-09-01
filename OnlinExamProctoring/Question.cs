@@ -2,10 +2,11 @@
 
 namespace OnlinExamProctoring
 {
-    internal class Question
+    public class Question
     {
         [Required]
         public int QuestionId { get; set; }
+
         public string Type { get; set; }
         public double Weight { get; set; }
         public string CorrectAnswer { get; set; }
