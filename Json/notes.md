@@ -539,4 +539,50 @@ Ignore if null
 WhenWritingDefault
         ↓
 Ignore if default
-```
+
+---------------------------------------------------------------------------------------------------------------
+***************************************************************************************************************
+---------------------------------------------------------------------------------------------------------------
+
+Naming Policies
+A naming policy lets you automatically change how C# property names appear in JSON.
+For example, suppose your C# class has:
+public class Student
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+}
+Normally:
+{
+  "FirstName": "Vanshika",
+  "LastName": "Sharma"
+}
+But many APIs use camelCase:
+{
+  "firstName": "Vanshika",
+  "lastName": "Sharma"
+}
+We can configure this using JsonSerializerOptions:
+JsonSerializerOptions options = new JsonSerializerOptions
+{
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+};
+
+string json = JsonSerializer.Serialize(student, options);
+Output:
+{
+  "firstName": "Vanshika",
+  "lastName": "Sharma"
+}
+Common naming policies
+JsonNamingPolicy.CamelCase
+Converts:
+FirstName → firstName
+StudentAge → studentAge
+Important difference
+PropertyNamingPolicy applies globally:
+PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+Whereas [JsonPropertyName] applies to one specific property:
+[JsonPropertyName("student_name")]
+public string Name { get; set; }
+And if both are present, [JsonPropertyName] takes precedence for that property.
