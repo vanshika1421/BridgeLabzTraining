@@ -1,302 +1,293 @@
-﻿using Review_6;
-using static System.Net.WebRequestMethods;
+﻿
+using NUnit.Framework;
+using System;
+using System.IO;
+using System.Linq;
 
-namespace Review6_testing
+namespace Review_6.Tests
 {
-    public class Tests
+    [TestFixture]
+    public class SensorMonitorTests
     {
-        private Sensor sen;
-        private Thresholds thresholds;
+        private string thresholdFilePath;
+        private ThresholdFile thresholds;
+        private SensorMonitor monitor;
+
         [SetUp]
         public void Setup()
         {
-            sen = new Sensor();
-            thresholds = new Thresholds();
+            thresholdFilePath = "test-thresholds.json";
+
+            string json = """
+            {
+              "thresholds": [
+                {
+                  "type": "temperature",
+                  "min": -10,
+                  "max": 45
+                },
+                {
+                  "type": "humidity",
+                  "min": 0,
+                  "max": 90
+                },
+                {
+                  "type": "pressure",
+                  "min": 950,
+                  "max": 1050
+                }
+              ]
+            }
+            """;
+
+            File.WriteAllText(thresholdFilePath, json);
+
+            thresholds = new ThresholdFile(thresholdFilePath);
+            monitor = new SensorMonitor(thresholds);
         }
 
-       [Test]
-        public void Testing_ValueBelowMinimum()
+        [TearDown]
+        public void Cleanup()
         {
-            Sensor s1 = new Sensor
+            if (File.Exists(thresholdFilePath))
             {
-                SensorId = 2,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "Temperature",
-                Value = -11f
-            };
-            List<Thresholds> list = new List<Thresholds>();
-            Thresholds thres = new Thresholds
-            {
-                Type = "Temperature",
-                min = -10,
-                max = 45
-            };
-            list.Add(thres);
-            Thresholds t1 = new Thresholds
-            {
-                Type = "Humidity",
-                min = 0,
-                max = 90
-            };
-            list.Add(t1);
-            Thresholds t2 = new Thresholds
-            {
-                Type = "Pressure",
-                min = 0,
-                max = 90
-            };
-            list.Add(t2);
-
-            Assert.That(thresholds.Validate_sensor_Value(list, s1), Is.False);
+                File.Delete(thresholdFilePath);
+            }
         }
+
+        // 1. Reading within threshold
         [Test]
-        public void Testing_ValueAboveMaximum()
+        public void ReadingWithinThreshold_ShouldNotBeBreach()
         {
-            Sensor s1 = new Sensor
-            {
-                SensorId = 2,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "Temperature",
-                Value = 50f
-            };
-            List<Thresholds> list = new List<Thresholds>();
-            Thresholds thres = new Thresholds
-            {
-                Type = "Temperature",
-                min = -10,
-                max = 45
-            };
-            list.Add(thres);
-            Thresholds t1 = new Thresholds
-            {
-                Type = "Humidity",
-                min = 0,
-                max = 90
-            };
-            list.Add(t1);
-            Thresholds t2 = new Thresholds
-            {
-                Type = "Pressure",
-                min = 0,
-                max = 90
-            };
-            list.Add(t2);
+            Sensor sensor = new Sensor(
+                "SN1",
+                new DateTime(2026, 9, 1, 8, 0, 0),
+                "temperature",
+                23.5);
 
-            Assert.That(thresholds.Validate_sensor_Value(list, s1), Is.False);
+            Assert.DoesNotThrow(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "23.5"));
+
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.False);
         }
+
+        // 2. Value exactly at minimum boundary
         [Test]
-        public void ValueExactly_At_Maximum()
+        public void ValueAtMinimumBoundary_ShouldBeValid()
         {
-            Sensor s1 = new Sensor
-            {
-                SensorId = 2,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "Temperature",
-                Value = 45f
-            };
-            List<Thresholds> list = new List<Thresholds>();
-            Thresholds thres = new Thresholds
-            {
-                Type = "Temperature",
-                min = -10,
-                max = 45
-            };
-            list.Add(thres);
-            Thresholds t1 = new Thresholds
-            {
-                Type = "Humidity",
-                min = 0,
-                max = 90
-            };
-            list.Add(t1);
-            Thresholds t2 = new Thresholds
-            {
-                Type = "Pressure",
-                min = 0,
-                max = 90
-            };
-            list.Add(t2);
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                -10);
 
-            Assert.That(thresholds.Validate_sensor_Value(list, s1), Is.True);
+            Assert.DoesNotThrow(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "-10"));
+
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.False);
         }
+
+        // 3. Value exactly at maximum boundary
         [Test]
-        public void Value_Exactly_At_Minimum()
+        public void ValueAtMaximumBoundary_ShouldBeValid()
         {
-          
-            Sensor s1 = new Sensor
-            {
-                SensorId = 2,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "Temperature",
-                Value = -10f
-            };
-            List<Thresholds> list = new List<Thresholds>(); 
-            Thresholds thres = new Thresholds
-            {
-                Type = "Temperature",
-                min = -10,
-                max = 45
-            };
-            list.Add(thres);
-            Thresholds t1 = new Thresholds
-            {
-                Type = "Humidity",
-                min = 0,
-                max = 90
-            };
-            list.Add(t1);
-            Thresholds t2 = new Thresholds
-            {
-                Type = "Pressure",
-                min = 0,
-                max = 90
-            };
-            list.Add(t2);
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                45);
 
-            Assert.That(thresholds.Validate_sensor_Value(list, s1), Is.True);
+            Assert.DoesNotThrow(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "45"));
 
-
-
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.False);
         }
+
+        // 4. Value below minimum
         [Test]
-        public void Testing_Unknown_SensorType()
+        public void ValueBelowMinimum_ShouldBeBreach()
         {
-            List<Sensor> s = new List<Sensor>();
-            Sensor s0 = new Sensor
-            {
-                SensorId = 1,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "temperature",
-                Value = 23.5f
-            };
-            s.Add(s0);
-            Sensor s1 = new Sensor
-            {
-                SensorId = 2,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "temperature",
-                Value = 23.5f
-            };
-            s.Add(s1);
-            Sensor s2 = new Sensor
-            {
-                SensorId = 3,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 5),
-                Type = "Humidity",
-                Value = 23.5f
-            };
-            s.Add(s2);
-            Sensor s3 = new Sensor
-            {
-                SensorId = 4,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 5),
-                Type = "Pressure",
-                Value = 23.5f
-            };
-            s.Add(s3);
-            Sensor s4 = new Sensor
-            {
-                SensorId = 1,
-                Timestamp = new DateTime(2026, 9, 1, 8, 1, 0),
-                Type = "Voltage",
-                Value = 23.5f
-            };
-            s.Add(s4);
-            Sensor s5 = new Sensor
-            {
-                SensorId = 1,
-                Timestamp = new DateTime(2026, 9, 1, 8, 1, 0),
-                Type = "temperature",
-                Value = 23.5f
-            };
-            s.Add(s5);
-            String type = "Humidity";
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                -11);
 
-            Assert.That(sen.ValidSensors_Type(s, type), Is.True);
+            Assert.DoesNotThrow(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "-11"));
+
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.False);
         }
+
+        // 5. Value above maximum
         [Test]
-        public void detect_3_Consecutive_threshold()
+        public void ValueAboveMaximum_ShouldBeBreach()
         {
-            List<Sensor> s = new List<Sensor>();
-            Sensor s0 = new Sensor
-            {
-                SensorId = 1,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "temperature",
-                Value = 23.5f
-            };
-            s.Add(s0);
-            Sensor s1 = new Sensor
-            {
-                SensorId = 2,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 0),
-                Type = "temperature",
-                Value = 23.5f
-            };
-            s.Add(s1);
-            Sensor s2 = new Sensor
-            {
-                SensorId = 3,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 5),
-                Type = "Humidity",
-                Value = 95f
-            };
-            s.Add(s2);
-            Sensor s3 = new Sensor
-            {
-                SensorId = 4,
-                Timestamp = new DateTime(2026, 9, 1, 8, 0, 5),
-                Type = "Pressure",
-                Value = 23.5f
-            };
-            s.Add(s3);
-            Sensor s4 = new Sensor
-            {
-                SensorId = 1,
-                Timestamp = new DateTime(2026, 9, 1, 8, 1, 0),
-                Type = "Pressure",
-                Value = 23.5f
-            };
-            s.Add(s4);
-            Sensor s5 = new Sensor
-            {
-                SensorId = 1,
-                Timestamp = new DateTime(2026, 9, 1, 8, 1, 0),
-                Type = "temperature",
-                Value = 23.5f
-            };
-            s.Add(s5);
-            List<Thresholds> list = new List<Thresholds>();
-            Thresholds thres = new Thresholds
-            {
-                Type = "Temperature",
-                min = -10,
-                max = 45
-            };
-            list.Add(thres);
-            Thresholds t1 = new Thresholds
-            {
-                Type = "Humidity",
-                min = 0,
-                max = 90
-            };
-            list.Add(t1);
-            Thresholds t2 = new Thresholds
-            {
-                Type = "Pressure",
-                min = 0,
-                max = 90
-            };
-            list.Add(t2);
-            Assert.That(thresholds.detect_3_Consecutive_threshold(list, s), Is.True);
-        }
-        public void testing_Blank_Sensor_Value()
-        {
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                46);
 
-        }
-        public void Rolling_window_retains_only_latest_five_records()
-        {
+            Assert.DoesNotThrow(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "46"));
 
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.False);
         }
+
+        // 6. Unknown sensor type
+        [Test]
+        public void UnknownSensorType_ShouldThrowException()
+        {
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "voltage",
+                230);
+
+            Assert.Throws<UnknownSensorTypeException>(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "230"));
+        }
+
+        // 7. Invalid timestamp
+        [Test]
+        public void InvalidTimestamp_ShouldThrowException()
+        {
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                23.5);
+
+            Assert.Throws<InvalidTimestampException>(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "invalid-date",
+                    "23.5"));
+        }
+
+        // 8. Blank / non-numeric sensor value
+        [Test]
+        public void BlankSensorValue_ShouldThrowException()
+        {
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                0);
+
+            Assert.Throws<InvalidSensorValueException>(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    ""));
+        }
+
+        [Test]
+        public void NonNumericSensorValue_ShouldThrowException()
+        {
+            Sensor sensor = new Sensor(
+                "SN1",
+                DateTime.Now,
+                "temperature",
+                0);
+
+            Assert.Throws<InvalidSensorValueException>(() =>
+                monitor.ProcessReading(
+                    sensor,
+                    "2026-09-01T08:00",
+                    "abc"));
+        }
+
+        [Test]
+        public void ThreeConsecutiveBreaches_ShouldTriggerAnomaly()
+        {
+            monitor.ProcessReading(
+                new Sensor(
+                    "SN1",
+                    DateTime.Now,
+                    "temperature",
+                    50),
+                "2026-09-01T08:00",
+                "50");
+
+            monitor.ProcessReading(
+                new Sensor(
+                    "SN1",
+                    DateTime.Now,
+                    "temperature",
+                    51),
+                "2026-09-01T08:01",
+                "51");
+
+            monitor.ProcessReading(
+                new Sensor(
+                    "SN1",
+                    DateTime.Now,
+                    "temperature",
+                    52),
+                "2026-09-01T08:02",
+                "52");
+
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.True);
+        }
+
+
+        [Test]
+        public void TwoConsecutiveBreaches_ShouldNotTriggerAnomaly()
+        {
+            monitor.ProcessReading(
+                new Sensor(
+                    "SN1",
+                    DateTime.Now,
+                    "temperature",
+                    50),
+                "2026-09-01T08:00",
+                "50");
+
+            monitor.ProcessReading(
+                new Sensor(
+                    "SN1",
+                    DateTime.Now,
+                    "temperature",
+                    51),
+                "2026-09-01T08:01",
+                "51");
+
+            Assert.That(
+                monitor.HasThreeConsecutiveBreaches("SN1"),
+                Is.False);
+        }
+
     }
 }

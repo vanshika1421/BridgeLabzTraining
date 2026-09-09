@@ -1,34 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Review_6
 {
-    internal class UnknownSensorException : Exception
+    public class SensorException : Exception
+    {
+        public SensorException(string message) : base(message) { }
+    }
 
+    public class UnknownSensorTypeException : SensorException
     {
-        
-        public UnknownSensorException() : base(){
-            Console.WriteLine("UnknownSensor Exception");
-        }
-     
-        //ExceptionsSensorException
-        // ├── UnknownSensorTypeException
-        // ├── InvalidSensorValueException
-        // └── InvalidTimestampExceptionNUnit Testing — Minimum 8 Tests
+        public UnknownSensorTypeException(string message) : base(message) { }
     }
-    public class InvalidSensorValueException : Exception
+
+    public class InvalidSensorValueException : SensorException
     {
-        public InvalidSensorValueException() : base()
-        {
-            Console.WriteLine("Invalid sensor exception");
-        }
+        public InvalidSensorValueException(string message) : base(message) { }
     }
-    public class InvalidTimestampException : Exception
+
+    public class InvalidTimestampException : SensorException
     {
-        public InvalidTimestampException(String message) : base(message)
-        {
-            Console.WriteLine("InvalidTimestampException ");
-        }
+        public InvalidTimestampException(string message) : base(message) { }
     }
 }
