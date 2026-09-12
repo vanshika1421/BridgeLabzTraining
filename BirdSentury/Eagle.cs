@@ -6,8 +6,8 @@ namespace BirdSentury
 {
     internal class Eagle : Bird , IRunable , IFlyable
     {
-        public Eagle(string name, int age , string species ,  int id , Gender gender)
-      : base(name, age, "Eagle" , id , gender)
+        public Eagle( int id , Gender gender)
+      : base( id , gender)
         {
         }
 
