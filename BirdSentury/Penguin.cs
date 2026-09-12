@@ -7,8 +7,8 @@ namespace BirdSentury
     internal class Penguin : Bird , ISwimable  , IRunable
     {
         
-        public Penguin(string name, int age , string species , int id , Gender gender)
-        : base(name, age, "Duck" , id , gender)
+        public Penguin( int id , Gender gender)
+        : base( id , gender)
         {
         }
 
