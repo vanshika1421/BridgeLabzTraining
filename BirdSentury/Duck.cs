@@ -2,8 +2,8 @@
 
 class Duck : Bird, IFlyable, ISwimable, IRunable
 {
-    public Duck(string name, int age ,string species , int id , Gender gender)
-        : base(name, age, "Duck" , id ,gender)
+    public Duck(int id , Gender gender)
+        : base( id ,gender)
     {
     }
 
