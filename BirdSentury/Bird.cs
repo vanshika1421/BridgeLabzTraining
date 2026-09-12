@@ -18,12 +18,12 @@ namespace BirdSentury
         public string species { get; set; }
         public int Id { get; set; }
         public Gender Gender { get; set; }
-
-        public Bird(String name, int age, string species, int Id, Gender gender)
+        public Bird(){
+            
+        }
+        public Bird( int Id, Gender gender)
         {
-            Name = name;
-            this.age = age;
-            this.species = species;
+         
             this.Id = Id;
             Gender = gender;
         }
