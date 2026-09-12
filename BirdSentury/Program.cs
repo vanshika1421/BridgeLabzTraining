@@ -14,9 +14,18 @@ class Program
     static void Main()
     {
         Sentury sanctuary = new Sentury();
-
-        Bird duck = new Duck("Donald dcuck" ,5  , "Duck" , 1  , Gender.FEMALE);
-        Bird duck1 = new Duck("Donald dcuck", 5, "Duck", 2, Gender.FEMALE);
+        Bird duck = new Duck(1, Gender.FEMALE)
+        {
+            Name = "Donald duck",
+            species ="Duck"
+        
+        };
+        Bird duck1 = new Duck(2, Gender.FEMALE)
+        {
+            Name = "Donald duck2",
+            species ="Duck"
+        
+        };
          sanctuary.AddBird(duck);
       sanctuary.AddBird(duck1);
         HashSet<Bird> set = new HashSet<Bird>();
