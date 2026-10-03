@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../BusinessLayer/BusinessLayer.csproj" Id="7b33f8c8-ec88-4f1f-a3c1-a1f17ce30b3f" />
+  <Project Path="../ModelLayer/ModelLayer.csproj" Id="0c2bcdba-34db-4214-971e-5e04bcf109e3" />
+  <Project Path="../ServiceLayer/RepositoryLayer.csproj" Id="8b303548-3e5d-4f87-bc93-08c5243684cc" />
+  <Project Path="Fundoo.csproj" />
+</Solution>
